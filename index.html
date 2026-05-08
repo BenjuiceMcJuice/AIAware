@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Sense — A Practical Guide to AI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --blue-mid: #bfdbfe;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --warn: #fef3c7;
+      --warn-border: #f59e0b;
+      --tip: #f0fdf4;
+      --tip-border: #22c55e;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 24px;
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--blue);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .logo span { color: var(--text); }
+    .progress-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+      max-width: 200px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 99px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    .progress-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      height: fit-content;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 0;
+      box-shadow: var(--shadow);
+    }
+    .sidebar-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 16px 12px;
+    }
+    .nav-item {
+      display: block;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      text-align: left;
+      width: 100%;
+      line-height: 1.4;
+    }
+    .nav-item:hover { color: var(--blue); background: var(--blue-light); }
+    .nav-item.active { color: var(--blue); border-left-color: var(--blue); background: var(--blue-light); font-weight: 600; }
+
+    /* ── Sections ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 72px;
+    }
+    .section + .section { margin-top: 20px; }
+
+    .section-number {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+    .section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+    .section p { color: var(--text); margin-bottom: 12px; }
+    .section p:last-child { margin-bottom: 0; }
+
+    /* Hero section */
+    .hero {
+      background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      padding: 40px 32px;
+    }
+    .hero .section-number { color: rgba(255,255,255,0.7); }
+    .hero h2 { color: white; font-size: 1.8rem; margin-bottom: 8px; }
+    .hero .tagline { font-size: 1rem; opacity: 0.85; margin-bottom: 0; }
+    .hero p { color: rgba(255,255,255,0.9); }
+    .hero .pill {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      margin-top: 16px;
+      color: white;
+    }
+
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; color: var(--text); }
+    li:last-child { margin-bottom: 0; }
+    strong { color: var(--text); }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 16px 0;
+      border-left: 4px solid;
+    }
+    .callout-warn { background: var(--warn); border-color: var(--warn-border); }
+    .callout-tip { background: var(--tip); border-color: var(--tip-border); }
+    .callout-info { background: var(--blue-light); border-color: var(--blue); }
+    .callout-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .callout-warn .callout-label { color: #92400e; }
+    .callout-tip .callout-label { color: #166534; }
+    .callout-info .callout-label { color: var(--blue); }
+    .callout p { margin-bottom: 0; font-size: 0.93rem; }
+    .callout ul { margin-bottom: 0; }
+    .callout li { font-size: 0.93rem; }
+
+    /* Two-col compare */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    @media (max-width: 500px) { .compare { grid-template-columns: 1fr; } }
+    .compare-col {
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .compare-col.yes { background: var(--tip); border: 1px solid #bbf7d0; }
+    .compare-col.no { background: #fff1f2; border: 1px solid #fecdd3; }
+    .compare-col h4 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .compare-col.yes h4 { color: #166534; }
+    .compare-col.no h4 { color: #be123c; }
+    .compare-col li { font-size: 0.88rem; margin-bottom: 5px; }
+
+    /* Example chips */
+    .example-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .example-chip {
+      background: var(--blue-light);
+      border: 1px solid var(--blue-mid);
+      color: var(--blue);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    /* Step list */
+    .step-list { list-style: none; padding: 0; counter-reset: steps; }
+    .step-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-list li:last-child { border-bottom: none; }
+    .step-list li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    /* Quote block */
+    blockquote {
+      border-left: 4px solid var(--blue-mid);
+      padding: 12px 16px;
+      margin: 16px 0;
+      background: var(--blue-light);
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">AI<span>Sense</span></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">Section 1 of 11</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar nav -->
+  <nav class="sidebar" aria-label="Sections">
+    <div class="sidebar-title">Contents</div>
+    <button class="nav-item active" onclick="scrollTo('s0')">Introduction</button>
+    <button class="nav-item" onclick="scrollTo('s1')">1. What is GenAI?</button>
+    <button class="nav-item" onclick="scrollTo('s2')">2. Where it gets info</button>
+    <button class="nav-item" onclick="scrollTo('s3')">3. How to interact</button>
+    <button class="nav-item" onclick="scrollTo('s4')">4. Ask vs. Do</button>
+    <button class="nav-item" onclick="scrollTo('s5')">5. Tokens & limits</button>
+    <button class="nav-item" onclick="scrollTo('s6')">6. Hallucinations</button>
+    <button class="nav-item" onclick="scrollTo('s7')">7. Privacy & data</button>
+    <button class="nav-item" onclick="scrollTo('s8')">8. Is it cheating?</button>
+    <button class="nav-item" onclick="scrollTo('s9')">9. Getting the most</button>
+    <button class="nav-item" onclick="scrollTo('s10')">10. Use cases</button>
+    <button class="nav-item" onclick="scrollTo('s11')">11. Bigger projects</button>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+
+    <section class="section hero" id="s0">
+      <div class="section-number">Your guide to AI</div>
+      <h2>AI Sense</h2>
+      <p class="tagline">A practical, no-nonsense guide to using AI tools well — whoever you are.</p>
+      <p>Whether you've never used an AI tool or you use one every day, this guide will help you understand what's actually going on, how to get the best out of it, and where to be careful.</p>
+      <span class="pill">11 sections · 10 min read</span>
+    </section>
+
+    <section class="section" id="s1">
+      <div class="section-number">Section 1</div>
+      <h2>What is Generative AI and How Does it Work?</h2>
+      <p>Generative AI (often just called "AI" or "GenAI") is software that generates content — text, images, code, or documents — in response to something you give it. That "something" is called a <strong>prompt</strong>, and it can be words, questions, files, images, or a combination.</p>
+      <p>Well-known examples include ChatGPT, Claude, Gemini, and Copilot, among many others.</p>
+      <div class="callout callout-info">
+        <div class="callout-label">Think of it this way</div>
+        <p>AI is a tool — much like a calculator. A calculator doesn't do your maths homework for you in any dishonest sense; it helps you work faster and more accurately. GenAI is the same principle, just applied to a much wider range of tasks.</p>
+      </div>
+    </section>
+
+    <section class="section" id="s2">
+      <div class="section-number">Section 2</div>
+      <h2>Where Does it Get its Information?</h2>
+      <p>AI tools are trained on vast amounts of text — a huge portion of the written internet. This includes academic papers, books, forums, news articles, code repositories, and everything in between.</p>
+      <p>This means AI can be excellent on well-documented topics — coding, widely covered subjects, established processes — but may be less reliable on niche, recent, or contested topics.</p>
+      <div class="callout callout-warn">
+        <div class="callout-label">Important</div>
+        <p><strong>AI does not work like a search engine.</strong> It doesn't "look things up" when you ask a question. Instead, it learned statistical patterns during training — which words, ideas, and structures tend to follow others. When you send a message, it predicts the most coherent and relevant response based on those patterns.</p>
+      </div>
+      <blockquote>Think of it less like a library and more like a very well-read colleague who has absorbed an enormous amount of information and can synthesise it on demand — but who can also occasionally misremember things or state something confidently that is simply wrong.</blockquote>
+    </section>
+
+    <section class="section" id="s3">
+      <div class="section-number">Section 3</div>
+      <h2>How to Interact With it</h2>
+      <p>AI tools work through a simple text-based conversation. You send a message, it responds. Many tools also let you attach files, images, or documents for the AI to read and analyse.</p>
+      <p>Most AI tools maintain memory <strong>within</strong> a conversation — it remembers what you said earlier in the same chat. Some carry memory <strong>across</strong> conversations, though this varies.</p>
+      <ul>
+        <li><strong>Quality in, quality out.</strong> Vague questions tend to get vague answers.</li>
+        <li><strong>You can give AI a role.</strong> Starting with "Act as an experienced project manager..." can meaningfully shape the tone and focus of responses.</li>
+        <li><strong>You can always ask for a redo.</strong> If the first response isn't right, ask it to explain, simplify, or try again.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s4">
+      <div class="section-number">Section 4</div>
+      <h2>Ask vs. Do — Being Clear About What You Want</h2>
+      <p>One of the most common sources of frustration is not being explicit about the <strong>type</strong> of response you want. There's a significant difference between asking for an opinion and asking for an action.</p>
+      <div class="compare">
+        <div class="compare-col no">
+          <h4>Vague</h4>
+          <ul>
+            <li>"What do you think of this document?"</li>
+            <li>"Can you help with my email?"</li>
+          </ul>
+        </div>
+        <div class="compare-col yes">
+          <h4>Clear</h4>
+          <ul>
+            <li>"Review this and tell me what you think — don't change anything yet"</li>
+            <li>"Rewrite this email to be more concise"</li>
+          </ul>
+        </div>
+      </div>
+      <p>If you're not clear, AI will make an assumption — and it may guess wrong. Get into the habit of being explicit about format too: if you want bullet points, say so. If you want it short, say so.</p>
+      <div class="callout callout-tip">
+        <div class="callout-label">Tip</div>
+        <p>Try: "Give me your opinion first, then ask me if I want you to action it." This keeps you in control of the flow.</p>
+      </div>
+    </section>
+
+    <section class="section" id="s5">
+      <div class="section-number">Section 5</div>
+      <h2>Understanding Tokens — Why There Are Limits</h2>
+      <p>AI tools run on a system of <strong>tokens</strong>. Every piece of text you send, every file you attach, and every word of the response generated uses tokens. The more complex or lengthy the task, the more tokens are consumed.</p>
+      <p>Most AI tools offer a free tier with token limits — for example, a cap on how many images you can analyse per day, or how many long documents you can process in an hour. Paid versions significantly increase these limits.</p>
+      <div class="callout callout-tip">
+        <div class="callout-label">Good habit</div>
+        <p>Keep conversations focused and start new conversations for new topics. Every message you send often causes the tool to re-process the entire conversation history — which uses more tokens than you might expect.</p>
+      </div>
+    </section>
+
+    <section class="section" id="s6">
+      <div class="section-number">Section 6</div>
+      <h2>Hallucinations — The Most Important Thing to Know</h2>
+      <div class="callout callout-warn">
+        <div class="callout-label">Critical</div>
+        <p><strong>AI can and does make things up.</strong> This is known as "hallucination." It will sometimes state incorrect facts, fabricate references, invent statistics, or produce plausible-sounding but entirely wrong information — with complete confidence and no indication that anything is amiss.</p>
+      </div>
+      <p>This is not a bug that will simply be fixed one day. It is a characteristic of how these models work.</p>
+      <ul>
+        <li>Never use AI output for anything important without checking it</li>
+        <li>Be especially cautious with specific facts, figures, dates, names, and citations</li>
+        <li>If something sounds surprising or too convenient, verify it independently</li>
+        <li>The more niche or specific the topic, the higher the risk of inaccuracy</li>
+      </ul>
+      <div class="callout callout-info">
+        <div class="callout-label">Remember</div>
+        <p>AI is a powerful tool for drafting, structuring, summarising, and generating ideas. It is <strong>not</strong> a reliable source of ground truth on its own.</p>
+      </div>
+    </section>
+
+    <section class="section" id="s7">
+      <div class="section-number">Section 7</div>
+      <h2>Privacy and Data — What to Share and What Not To</h2>
+      <p>Anything you type into an AI tool may be stored, reviewed, or used by the provider depending on their terms of service. For personal use, it's worth reading the small print.</p>
+      <p>For professional or work use, this becomes more important. Many organisations have specific policies on what can and cannot be shared with external AI tools.</p>
+      <ul>
+        <li><strong>Don't paste in confidential client data, personal data, or sensitive commercial information</strong> unless you're using a tool your organisation has specifically approved and secured for that purpose.</li>
+        <li>Be aware that some corporate AI deployments are specifically designed to keep data within a secure environment — know which you're using.</li>
+        <li>When in doubt, anonymise or generalise the information before sharing it.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s8">
+      <div class="section-number">Section 8</div>
+      <h2>Is it Cheating?</h2>
+      <p><strong>Using AI is not cheating by default.</strong> It's a tool. Using a calculator is not cheating. Using a spell-checker is not cheating. Using AI to help you work faster, clearer, or better is not cheating — in most contexts.</p>
+      <div class="compare">
+        <div class="compare-col no">
+          <h4>It is cheating when...</h4>
+          <ul>
+            <li>You're being assessed on your own knowledge in an exam or interview</li>
+            <li>You submit AI-generated work as your own in an academic setting where original thinking is evaluated</li>
+            <li>You enter AI content into a competition that explicitly prohibits it</li>
+            <li>You use it to deceive someone about your own capabilities</li>
+          </ul>
+        </div>
+        <div class="compare-col yes">
+          <h4>It is not cheating when...</h4>
+          <ul>
+            <li>You have the idea but struggle to express it clearly</li>
+            <li>You could do it yourself but it would take significantly longer</li>
+            <li>You use it to research options or structure your thinking</li>
+            <li>You review, edit, and take responsibility for the output</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout callout-info">
+        <div class="callout-label">The key principle</div>
+        <p>You own and are responsible for anything you send out, regardless of whether AI produced it. If you wouldn't be comfortable defending it if questioned, don't send it.</p>
+      </div>
+    </section>
+
+    <section class="section" id="s9">
+      <div class="section-number">Section 9</div>
+      <h2>Getting the Most Out of AI</h2>
+      <ul>
+        <li><strong>Start with clarity.</strong> Before you open a conversation, spend a moment thinking about what you actually want. A clear goal produces a better result.</li>
+        <li><strong>Chunk your work.</strong> Don't ask AI to take two complex documents, compare them, and produce a new one all in one go. Break the task into steps and work through them one at a time.</li>
+        <li><strong>Use new conversations for new topics.</strong> Mixing topics can produce unexpected results as the AI tries to link things that aren't related.</li>
+        <li><strong>Treat it like a capable but occasionally unreliable colleague.</strong> It will sometimes misinterpret your instructions or go off track. That's normal — correct it and carry on.</li>
+        <li><strong>Experiment.</strong> Some AI tools are better at certain tasks than others. Try different approaches to find what works best for you.</li>
+        <li><strong>You can ask AI how to use AI.</strong> If you're not sure how to approach a task, ask it to suggest an approach and work through it step by step.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s10">
+      <div class="section-number">Section 10</div>
+      <h2>Example Use Cases — From Simple to Complex</h2>
+      <p>To give a sense of the range of what's possible:</p>
+      <div class="example-list">
+        <span class="example-chip">Answering factual questions</span>
+        <span class="example-chip">Explaining concepts in plain language</span>
+        <span class="example-chip">Rewriting text in a different tone</span>
+        <span class="example-chip">Drafting emails from rough notes</span>
+        <span class="example-chip">Structuring a project plan</span>
+        <span class="example-chip">Comparing two documents</span>
+        <span class="example-chip">Summarising long content</span>
+        <span class="example-chip">Analysing data tables</span>
+        <span class="example-chip">Writing or debugging code</span>
+        <span class="example-chip">Generating ideas</span>
+        <span class="example-chip">Combining tasks for bigger projects</span>
+      </div>
+    </section>
+
+    <section class="section" id="s11">
+      <div class="section-number">Section 11</div>
+      <h2>Working Through a Bigger Project</h2>
+      <p>For more complex tasks, a step-by-step approach works best. Here's how that might look in practice:</p>
+      <ol class="step-list">
+        <li>Describe the overall goal to AI and ask it to suggest a structured approach. Save that as your working plan.</li>
+        <li>Feed the plan back in and say "Let's start with step 1."</li>
+        <li>Work through step 1, review the output, make any edits, and save the result.</li>
+        <li>In the next message, include the updated plan and the output from step 1, then say "Let's move to step 2."</li>
+        <li>Continue this way, keeping the AI informed of where you are and what has already been done.</li>
+        <li>Keep going until you're satisfied with the outcome.</li>
+      </ol>
+      <div class="callout callout-tip">
+        <div class="callout-label">Why this works</div>
+        <p>This approach keeps the work manageable, the context clear, and the quality of output significantly higher than trying to do everything at once.</p>
+      </div>
+      <p style="margin-top:16px; color: var(--text-muted); font-style: italic; font-size: 0.93rem;">This is a living guide. As AI tools evolve, some specifics will change — but the core principles of clarity, scepticism, ownership, and common sense will remain relevant.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <strong>AI Sense</strong> — A practical guide to using AI well.<br>
+  <span style="margin-top:4px; display:inline-block;">Share freely.</span>
+</footer>
+
+<script>
+  var sections = ['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11'];
+  var navItems = document.querySelectorAll('.nav-item');
+  var progressBar = document.getElementById('progressBar');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function scrollTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function getActiveSection() {
+    var scrollY = window.scrollY + 80;
+    var active = 0;
+    for (var i = 0; i < sections.length; i++) {
+      var el = document.getElementById(sections[i]);
+      if (el && el.offsetTop <= scrollY) active = i;
+    }
+    return active;
+  }
+
+  function updateNav() {
+    var active = getActiveSection();
+    navItems.forEach(function(item, i) {
+      item.classList.toggle('active', i === active);
+    });
+    var pct = ((active + 1) / sections.length) * 100;
+    progressBar.style.width = pct + '%';
+    progressLabel.textContent = 'Section ' + (active + 1) + ' of ' + sections.length;
+  }
+
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+</script>
+
+</body>
+</html>
